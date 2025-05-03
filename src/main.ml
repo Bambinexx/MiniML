@@ -1,7 +1,7 @@
 open Lexer
 open Parser
 
-let () = 
+let () =
   let filename = Sys.argv.(1) in 
   let file = In_channel.with_open_text filename In_channel.input_all in
 
