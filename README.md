@@ -1,2 +1,2 @@
 # MiniML
-Subset of OCaml coded in OCaml :p
+Custom language that started as a subset of OCaml but turned into its own thing, kinda
