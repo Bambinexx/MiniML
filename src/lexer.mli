@@ -1,11 +1,12 @@
 exception LexingError
 
 type token = Id of string | Num of int 
-  | Plus | Minus | Times | Divides | LPar | RPar
+  | Plus | Minus | Times | Divide | LPar | RPar
   | LThan | GThan | LTEq | GTEq | IsEqual | Different
   | Fun | Arrow | Equals | Let | In | If | Then | Else
   | True | False | And | Or | Not
 
+val stringToCharlist : string -> char list
 val charlistToString : char list -> string
 val charToInt : char -> int
 val charlistToNum : char list -> int

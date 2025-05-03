@@ -1,10 +1,13 @@
 exception LexingError
 
 type token = Id of string | Num of int 
-  | Plus | Minus | Times | Divides | LPar | RPar
+  | Plus | Minus | Times | Divide | LPar | RPar
   | LThan | GThan | LTEq | GTEq | IsEqual | Different
   | Fun | Arrow | Equals | Let | In | If | Then | Else
   | True | False | And | Or | Not
+
+let rec stringToCharlist s = 
+  List.init (String.length s) (String.get s);;
 
 let rec charlistToString s = 
   match s with
@@ -47,10 +50,14 @@ let rec parseVar s =
                 ([], s)
 
 let parseId s = 
-  if isLowercase (List.hd s) then let sp = parseVar (List.tl s) in 
-    (List.hd s::(fst sp), snd sp)
+  if s <> [] then (
+    if isLowercase (List.hd s) then let sp = parseVar (List.tl s) in 
+      (List.hd s::(fst sp), snd sp)
+    else
+      ([], s))
   else
     ([], s)
+      
 
 let rec parseNums s =
   match s with 
@@ -65,12 +72,13 @@ let rec parseNum s =
 
 let rec lexer expr =
   match expr with
+  | [] -> []
   | '\n'::q | '\t'::q | ' '::q -> lexer q
   | '-'::'>'::q -> Arrow::(lexer q)
   | '+'::q -> Plus::(lexer q)
   | '-'::q -> Minus::(lexer q)
   | '*'::q -> Times::(lexer q)
-  | '/'::q -> Divides::(lexer q)
+  | '/'::q -> Divide::(lexer q)
   | '('::q -> LPar::(lexer q)
   | ')'::q -> RPar::(lexer q)
   | '<'::'='::q -> LTEq::(lexer q)

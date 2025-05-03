@@ -13,7 +13,7 @@ type expression =
   | Diff of expression * expression
   | IsEq of expression * expression
   | GrThan of expression * expression
-  | LThan of expression * expression
+  | LeThan of expression * expression
   | GrEq of expression * expression
   | LEq of expression * expression
   | And of expression * expression
@@ -23,21 +23,19 @@ type expression =
 let parser tokens = 
   let rec parseExpr tks =
     let (e, q) = parseEquality tks in
-    match q with
-    | [] -> e
-    | _ -> raise ParsingError
+    (e,q)
 
   and parseEquality tks =
     let (e, q) = parseComp tks in
     match q with 
-    | IsEqual::tl -> IsEq(e, fst (parseEquality tl))
-    | Different::tl -> Diff(e, fst (parseEquality tl))
+    | IsEqual::tl -> let (e2, q2) = parseEquality tl in (IsEq(e, e2), q2)
+    | Different::tl -> let (e2, q2) = parseEquality tl in (Diff(e, e2), q2)
     | _ -> (e, q)
 
   and parseComp tks =
     let (e, q) = parseTerm tks in
     match q with 
-    | LThan::tl -> let (e2, q2) = parseComp tl in (LThan(e, e2), q2)
+    | LThan::tl -> let (e2, q2) = parseComp tl in (LeThan(e, e2), q2)
     | GThan::tl -> let (e2, q2) = parseComp tl in (GrThan(e, e2), q2)
     | LTEq::tl -> let (e2, q2) = parseComp tl in (LEq(e, e2), q2)
     | GTEq::tl -> let (e2, q2) = parseComp tl in (GrEq(e, e2), q2)
@@ -62,7 +60,7 @@ let parser tokens =
   and parseUnary tks = 
     match tks with
     | Not::tl -> let (e, q) = parseUnary tl in (Not(e), q)
-    | Minus::tl -> let (e, q) = parseUnary tl in (Minus(0, e), q)
+    | Minus::tl -> let (e, q) = parseUnary tl in (Sub(Num(0), e), q)
     | _ -> parsePrimary tks
 
   and parsePrimary tks = 
@@ -72,10 +70,10 @@ let parser tokens =
     | False::tl -> (False, tl)
     | Id(s)::tl -> (Var(s), tl)
     | Num(n)::tl -> (Num(n), tl)
-    | LPar::tl -> let (e, q) = parseExpr tl in 
+    | LPar::tl -> let (e, q) = parseExpr tl in (
                   match q with
                   | RPar::tl2 -> (e, tl2)
-                  | _ -> raise ParsingError
+                  | _ -> raise ParsingError )
     | Let::tl -> let (e, q) = parseExpr tl in 
                   ( match q with 
                   | Equals::tl2 -> let (e2, q2) = parseExpr tl2 in
@@ -86,13 +84,14 @@ let parser tokens =
                   | _ -> raise ParsingError )
     | If::tl -> let (e, q) = parseEquality tl in
                   ( match q with 
-                    | Then::tl2 -> let (e3, q3) = parseExpr tl2 in
-                                  (match q3 with
-                                   | Else::tl3 -> let (e3, q3) = parseExpr tl3 in (If(e, e2, e3), q3)
+                    | Then::tl2 -> let (e2, q2) = parseExpr tl2 in
+                                  (match q2 with
+                                   | Else::tl3 -> let (e3, q3) = parseExpr tl3 in (If(e, e2, e3), tl3)
                                    | _ -> raise ParsingError
                                   )
                     | _ -> raise ParsingError
                   )
+    | _ -> raise ParsingError
     
   in
-  parseExpr tokens
+  fst (parseExpr tokens)
