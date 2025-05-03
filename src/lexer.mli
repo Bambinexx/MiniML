@@ -1,9 +1,10 @@
 exception LexingError
 
-type expression = Id of string | Num of int 
+type token = Id of string | Num of int 
   | Plus | Minus | Times | Divides | LPar | RPar
   | LThan | GThan | LTEq | GTEq | IsEqual | Different
   | Fun | Arrow | Equals | Let | In | If | Then | Else
+  | True | False | And | Or | Not
 
 val charlistToString : char list -> string
 val charToInt : char -> int
@@ -16,4 +17,4 @@ val parseVar : char list -> char list * char list
 val parseId : char list -> char list * char list
 val parseNums : char list -> char list * char list
 val parseNum : char list -> char list * char list
-val lexer : char list -> expression list
+val lexer : char list -> token list
